@@ -76,6 +76,16 @@ async function startProxyServer(proxy) {
   });
 }
 
+async function clearCookies(page) {
+  try {
+    log('Deleting cookies with Network.clearBrowserCookies');
+    const client = await page.target().createCDPSession();
+    await client.send('Network.clearBrowserCookies');
+  } catch (err) {
+    log(`Could not delete cookies: ${err.toString()}`);
+  }
+}
+
 app.get('/api', async (req, res) => {
   if (req.query.proxy) {
     if (!validateProxy(req.query.proxy)) {
@@ -99,6 +109,8 @@ app.get('/api', async (req, res) => {
   let page = await browser.newPage();
   await page.goto(req.query.url, { waitUntil: "domcontentloaded" });
   let content = await page.content();
+  // clear cookies after we are done
+  await clearCookies(page);
 
   proxyServer.close();
   await page.close();
