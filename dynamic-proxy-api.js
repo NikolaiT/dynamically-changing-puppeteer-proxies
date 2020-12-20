@@ -4,6 +4,7 @@ const validUrl = require('valid-url');
 const puppeteer = require('puppeteer-core');
 const ProxyChain = require('proxy-chain');
 
+const CHROME_BINARY_PATH = '/usr/bin/chromium-browser';
 const app = express();
 const port = 3333;
 const proxyServerPort = 8947;
@@ -33,7 +34,7 @@ function validateProxy(proxy) {
 async function getBrowser() {
   if (browser === null) {
     browser = await puppeteer.launch({
-      executablePath: '/usr/bin/chromium-browser',
+      executablePath: CHROME_BINARY_PATH,
       headless: false,
       args: [`--proxy-server=http://localhost:` + proxyServerPort],
     });
@@ -101,7 +102,7 @@ app.get('/api', async (req, res) => {
 
   proxyServer.close();
   await page.close();
-  
+
   res.set('Content-Type', 'text/html');
   return res.send(Buffer.from(content));
 });
